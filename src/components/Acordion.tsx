@@ -1,6 +1,13 @@
 import React, {useState} from 'react';
 
-type PropsType = {
+type ItemType = {
+    id: number
+    title: string
+}
+type AccordionBodyPropsType = {
+    items: ItemType[]
+}
+type AccordionPropsType = {
     titleValue: string
 
 }
@@ -9,11 +16,16 @@ type PropsAccordionTitleType = {
     onDoubleClickHandle: () => void
 }
 
-function Accordion(props: PropsType) {
+function Accordion(props: AccordionPropsType) {
     let [collapsed, setCollapsed] = useState<boolean>(false)
     return <>
         <AccordionTitle onDoubleClickHandle={() => setCollapsed(!collapsed)} title={props.titleValue}/>
-        {collapsed && <AccordionBody/>}
+        {collapsed && <AccordionBody
+            items={[
+                {id: 1, title: "JS"},
+                {id: 2, title: "CSS"},
+                {id: 3, title: "REACT"},
+            ]}/>}
     </>
 
 }
@@ -26,11 +38,9 @@ function AccordionTitle(props: PropsAccordionTitleType) {
 
 }
 
-function AccordionBody() {
+const AccordionBody: React.FC<AccordionBodyPropsType> = ({items}) => {
     return <ul>
-        <li>1</li>
-        <li>2</li>
-        <li>3</li>
+        {items.map((i) => <li key={i.id}>{i.title}</li>)}
     </ul>
 }
 
