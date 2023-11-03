@@ -1,53 +1,73 @@
-import React, {useState} from 'react';
+import React, {KeyboardEvent, useEffect, useState} from 'react';
+import s from './Select.module.css'
 
 type ItemType = {
-    id: number
+    id: string
     title: string
 }
 
 type SelectPropsType = {
-    valueId: number
+    valueId?: any
     items: ItemType[]
+    onChange: (id: any) => void
 
 }
+
 function Select(props: SelectPropsType) {
     let [collapsed, setCollapsed] = useState<boolean>(false)
-    let [title, setTitle] = useState<string>(() => {
-        const item = props.items.find((i) => i.id === props.valueId) || ""
-        return item && item.title
-    })
-    const setValueHandler = (id: number) => {
-        const item = props.items.find(i => i.id === id) || ""
-        setTitle(item && item.title)
+    let [hoveredElementValue, setHoveredElementValue] = useState<string>(props.valueId)
+    useEffect(() => {
+        setHoveredElementValue(props.valueId)
+    }, [props.valueId])
+
+    const selectedItem = props.items.find(i => i.id === props.valueId)
+
+    const toggleCollapsed = () => setCollapsed(!collapsed);
+    const onItemClicked = (id: string) => {
+        props.onChange(id)
+        toggleCollapsed()
+    }
+    const onKeyUp = (e: KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            for (let i = 0; i < props.items.length; i++)
+                if (hoveredElementValue === props.items[i].id) {
+                    const pretendent = e.key === "ArrowDown"
+                        ? props.items[i + 1]
+                        : props.items[i - 1]
+                    if (pretendent) {
+                        props.onChange(pretendent.id)
+                        return;
+                    }
+                }
+            if (!selectedItem)
+                props.onChange(props.items[0].id)
+        }
+        if (e.key === "Escape" || e.key === "Enter") setCollapsed(false)
     }
     return <>
-        <SelectTitle onDoubleClickHandler={() => setCollapsed(!collapsed)}
-                     title={title}/>
-        {collapsed && <SelectBody
-            setValue={setValueHandler}
-            items={props.items}/>}
+        <div
+            className={s.select}
+            onKeyUp={onKeyUp}
+            tabIndex={0}>
+            <span className={s.main}
+                  onDoubleClick={toggleCollapsed}>
+                {selectedItem && selectedItem.title}
+            </span>
+            {collapsed &&
+                <div className={s.items}>
+                    {props.items.map((i) => <div
+                        onMouseEnter={() => setHoveredElementValue(i.id)}
+                        className={hoveredElementValue === i.id ? s.selected : ''}
+                        key={i.id}
+                        onClick={() => onItemClicked(i.id)}
+                    >{i.title}
+                    </div>)}
+                </div>
+            }
+        </div>
     </>
 
 }
 
-type SelectTitlePropsType = {
-    title: string
-    onDoubleClickHandler: () => void
-}
-function SelectTitle(props: SelectTitlePropsType) {
-    return <>
-        <h2 onDoubleClick={props.onDoubleClickHandler}>----{props.title}----</h2>
-    </>
 
-}
-type SelectBodyPropsType = {
-    items: ItemType[]
-    setValue: (id: number) => void
-}
-const SelectBody: React.FC<SelectBodyPropsType> = ({items, setValue}) => {
-    return <ul>
-        {items.map((i) => <li key={i.id} onClick={() => setValue(i.id)}>{i.title}</li>)}
-    </ul>
-}
-
-export default Select
+export default React.memo(Select)

@@ -31,17 +31,19 @@ function Accordion(props: AccordionPropsType) {
 }
 
 
-function AccordionTitle(props: PropsAccordionTitleType) {
+function AccordionTitleMemo(props: PropsAccordionTitleType) {
     return <>
         <h2 onDoubleClick={props.onDoubleClickHandle}>----{props.title}----</h2>
     </>
 
 }
+const AccordionTitle = React.memo(AccordionTitleMemo);
 
-const AccordionBody: React.FC<AccordionBodyPropsType> = ({items}) => {
+const AccordionBodyMemo: React.FC<AccordionBodyPropsType> = ({items}) => {
     return <ul>
         {items.map((i) => <li key={i.id}>{i.title}</li>)}
     </ul>
 }
+const AccordionBody = React.memo(AccordionBodyMemo);
 
-export default Accordion
+export default React.memo(Accordion)
