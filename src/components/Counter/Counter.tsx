@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 
 const Counter = () => {
     let [counter, setCounter] = useState<number>(() => {
